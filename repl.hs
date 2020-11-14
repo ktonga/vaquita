@@ -45,7 +45,7 @@ double :: Int -> Int
 double = \n -> n + n
 
 append' :: String -> String -> String
-append' = undefined -- TODO
+append' s s2 = s ++ s2
 
 
 
@@ -126,40 +126,45 @@ heads lists = map head lists
 
 -- conditional
 headOr :: a -> [a] -> a
-headOr = undefined
+headOr a l = if null l then a else head l
 
 -- guards
 javaCompare :: Int -> Int -> Int
-javaCompare = undefined
+javaCompare n1 n2 | n1 < n2 = -1
+                  | n1 == n2 = 0
+                  | otherwise = 1
 
 -- let/in and where
 
--- toTitleCase :: String -> String
--- toTitleCase s =
---   allWords = words s
---   capitalised = map capitalise allWords
---   unwords capitalised
-
-capitalise (c:cs) = toUpper c : cs
+toTitleCase :: String -> String
+toTitleCase s =
+  let allWords = words s
+      capitalised = map capitalise allWords
+  in  unwords capitalised
+ where
+  capitalise (c:cs) = toUpper c : cs
 
 -- pattern matching
 
 -- on list
 safeHead :: [a] -> Maybe a
-safeHead = undefined
+safeHead [] = Nothing
+safeHead (a : _) = Just a
 
 -- on tuple
 swap :: (a, b) -> (b, a)
-swap = undefined
+swap (a, b) = (b, a)
 
 -- on data
 valueOr :: a -> Maybe a -> a
-valueOr = undefined
+valueOr a Nothing = a
+valueOr _ (Just a) = a
 
 -- recursion
 
 count :: [a] -> Int
-count = undefined
+count [] = 0
+count (_:as) = 1 + count as
 
 listBetween :: Int -> Int -> [Int]
 listBetween from to = go to []
@@ -190,12 +195,11 @@ listBetween from to = go to []
 
 -- Changing the world with `IO`
 
-interactiveGrettings :: IO String
+interactiveGrettings :: IO ()
 interactiveGrettings = do
   putStr "What's your name?: "
   name <- getLine
   putStrLn $ grettings name
-  return name
 
 
 
