@@ -6,7 +6,6 @@ import           Hedgehog
 import           Hedgehog.Main (defaultMain)
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
-import           Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Map.Strict as Map
 import           Data.Either (isRight)
@@ -148,12 +147,12 @@ invalidExpenseGen = do
  where
   invalidDesc _ a pb sm =
     pure ("", a, pb, sm, EmptyDescription)
-  invalidAmount d _ pb sm = do 
+  invalidAmount d _ pb sm = do
     amount <- decimalGen 0.00 1000.00
     pure (d, Money (-amount), pb, sm, InvalidAmount)
   invalidPaidBy d a (Multiple m) sm =
     pure (d, a, Multiple $ Map.map (\(Money d) -> Money $ d + 0.1) m, sm, PaidByDoesNotAddUp)
-  invalidSplitMode d a pb (Equally ps) =
+  invalidSplitMode d a pb (Equally _) =
     pure (d, a, pb, Equally Set.empty, SplitEquallyEmptyParticipants)
   invalidSplitMode d a pb (Unequally m) =
     pure (d, a, pb, Unequally $ Map.map (\(Money d) -> Money $ d + 0.1) m, SplitUnequallyDoesNotAddUp)

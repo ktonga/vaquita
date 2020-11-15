@@ -88,18 +88,18 @@ mkExpense desc amount paidBy splitMode = do
 
   validatePaidBy x@(Single _)    = Right x
   validatePaidBy x@(Multiple ps) =
-    if (addUp getMoney) ps == getMoney amount
+    if addUp getMoney ps == getMoney amount
       then Right x
       else Left PaidByDoesNotAddUp
 
-  validateSplitMode x@(Equally ps) = 
+  validateSplitMode x@(Equally ps) =
     if null ps then Left SplitEquallyEmptyParticipants else Right x
   validateSplitMode x@(Unequally ps) =
-    if (addUp getMoney) ps == getMoney amount
+    if addUp getMoney ps == getMoney amount
       then Right x
       else Left SplitUnequallyDoesNotAddUp
   validateSplitMode x@(ByPercentage ps) =
-    if (addUp getPercentage) ps == 100
+    if addUp getPercentage ps == 100
       then Right x
       else Left SplitByPercentageDoesNotAddUp
 
@@ -136,7 +136,7 @@ settleUp whipRound =
       (getBack, owe)  = partition ((> 0) . snd) . removeSettledUp . Map.toList $ totals
       txs'            = txs getBack (fmap negate <$> owe)
   in SettleUp totals txs'
- where 
+ where
   txs [] _ = []
   txs _ [] = []
   txs ((gbp, gbm):getBack) ((op, om):owe)

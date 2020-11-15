@@ -35,7 +35,7 @@ theGang = [dennis, charlie, mac, dee, frank]
 
 mkExpense' d a p s = mkExpense d (Money a) (Single p) (Equally $ Set.fromList s)
 
-expenses = rights $
+expenses = rights
   [ mkExpense' "Burgers"  45 dennis  theGang
   , mkExpense' "Sausages" 30 dennis  theGang
   , mkExpense' "Veggies"  18 mac     [dennis, mac, dee]
