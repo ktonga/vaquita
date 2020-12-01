@@ -3,19 +3,17 @@
 
 module Vaquita where
 
-import           Data.Map.Strict (Map)
-import qualified Data.Map.Strict as Map
-import           Data.Set (Set)
-import qualified Data.Set as Set
+import Universum
 import           Data.List (partition)
 import           Data.Decimal
+import qualified Data.Map as Map
 
-newtype Participant = Participant { getParticipantName :: String  } deriving (Eq, Ord, Show)
-newtype Money       = Money       { getMoney           :: Decimal } deriving (Eq, Ord, Num)
+newtype Participant = Participant { getParticipantName :: Text    } deriving (Eq, Ord, Show)
+newtype Money       = Money       { getMoney           :: Decimal } deriving (Eq, Ord, Num, Show)
 newtype Percentage  = Percentage  { getPercentage      :: Decimal } deriving (Eq, Show, Num)
 
-instance Show Money where
-  show (Money m) = "$" ++ show (roundTo 2 m)
+formatMoney :: Money -> Text
+formatMoney (Money m) = "$" <> show (roundTo 2 m)
 
 type ParticipantsShare a = Map Participant a
 
@@ -29,7 +27,7 @@ data SplitMode = Equally (Set Participant)
   deriving (Eq, Show)
 
 data Expense = Expense
-             { expenseDescription :: String
+             { expenseDescription :: Text
              , expenseAmount      :: Money
              , expensePaidBy      :: PaidBy
              , expenseSplitMode   :: SplitMode
@@ -75,8 +73,7 @@ instance Semigroup SplitDetails where
 instance Monoid SplitDetails where
   mempty = SplitDetails 0 0
 
-
-mkExpense :: String -> Money -> PaidBy -> SplitMode -> Either ExpenseError Expense
+mkExpense :: Text -> Money -> PaidBy -> SplitMode -> Either ExpenseError Expense
 mkExpense desc amount paidBy splitMode = do
   desc'      <- if null desc then Left EmptyDescription else Right desc
   amount'    <- if getMoney amount > 0 then Right amount else Left InvalidAmount
@@ -84,7 +81,7 @@ mkExpense desc amount paidBy splitMode = do
   splitMode' <- validateSplitMode splitMode
   pure $ Expense desc' amount' paidBy' splitMode'
  where
-  addUp f = sum . map f . Map.elems
+  addUp f = sum . map f . elems
 
   validatePaidBy x@(Single _)    = Right x
   validatePaidBy x@(Multiple ps) =
@@ -115,11 +112,11 @@ splitDetails (Expense _ amount paidBy splitMode) =
  where
   combine (p, _) (_, s) = (p, s)
 
-  paid (Single p)    = Map.singleton p amount
+  paid (Single p)    = one (p, amount)
   paid (Multiple ps) = ps
 
   split (Equally ps) =
-    let eachOwes = Money $ getMoney amount / (fromIntegral . Set.size) ps
+    let eachOwes = Money $ getMoney amount / (fromIntegral . length) ps
     in  Map.fromSet (const eachOwes) ps
   split (Unequally ps)    = ps
   split (ByPercentage ps) = amountPer <$> ps
@@ -133,7 +130,7 @@ settleUp :: WhipRound -> SettleUp
 settleUp whipRound =
   let removeSettledUp = filter $ (/= 0.00) . roundTo 2 . getMoney . snd
       totals          = fmap total . balances $ whipRound
-      (getBack, owe)  = partition ((> 0) . snd) . removeSettledUp . Map.toList $ totals
+      (getBack, owe)  = partition ((> 0) . snd) . removeSettledUp . toPairs $ totals
       txs'            = txs getBack (fmap negate <$> owe)
   in SettleUp totals txs'
  where

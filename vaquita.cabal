@@ -21,8 +21,10 @@ library
       , Decimal
       , aeson
       , connection
+      , containers
       , http-client-tls
       , req
+      , safe-exceptions
       , scotty
       , universum
 
@@ -44,9 +46,13 @@ test-suite tests
         tests.hs
     hs-source-dirs:
         test
+    default-extensions:
+        NoImplicitPrelude
+      , OverloadedStrings
     build-depends:
         base ^>=4.14.1.0
-      , vaquita
-      , hedgehog
-      , containers
       , Decimal
+      , containers
+      , hedgehog
+      , universum
+      , vaquita

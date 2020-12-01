@@ -2,15 +2,14 @@
 
 module Main where
 
+import Universum
 import           Hedgehog
 import           Hedgehog.Main (defaultMain)
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 import qualified Data.Set as Set
 import qualified Data.Map.Strict as Map
-import           Data.Either (isRight)
 import           Data.Decimal
-import           Data.Foldable (fold)
 
 import           Vaquita
 
@@ -26,7 +25,7 @@ tests = checkParallel $$(discover)
 prop_mkExpense :: Property
 prop_mkExpense =
   property $ do
-    desc      <- forAll $ Gen.string (Range.linear 1 100) Gen.alpha
+    desc      <- forAll $ Gen.text (Range.linear 1 100) Gen.alpha
     amount    <- forAll $ moneyGen 0.10 1000.00
     paidBy    <- forAll $ paidByGen amount
     splitMode <- forAll $ splitModeGen amount
@@ -136,9 +135,9 @@ splitModeByPercentageGen = do
   share <- splitDecimalGen (length peeps) 100.00
   pure . ByPercentage . Map.fromList . zip (Set.toList peeps) . fmap Percentage $ share
 
-invalidExpenseGen :: Gen (String, Money, PaidBy, SplitMode, ExpenseError)
+invalidExpenseGen :: Gen (Text, Money, PaidBy, SplitMode, ExpenseError)
 invalidExpenseGen = do
-  desc      <- Gen.string (Range.linear 1 100) Gen.alpha
+  desc      <- Gen.text (Range.linear 1 100) Gen.alpha
   amount    <- moneyGen 0.10 1000.00
   paidBy    <- paidByMultipleGen amount
   splitMode <- splitModeGen amount
@@ -161,7 +160,7 @@ invalidExpenseGen = do
 
 expenseGen :: Gen Expense
 expenseGen = do
-  desc      <- Gen.string (Range.linear 1 100) Gen.alpha
+  desc      <- Gen.text (Range.linear 1 100) Gen.alpha
   amount    <- moneyGen 0.10 1000.00
   paidBy    <- paidByGen amount
   splitMode <- splitModeGen amount
